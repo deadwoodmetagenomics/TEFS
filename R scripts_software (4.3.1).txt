@@ -1,0 +1,624 @@
+R SCRIPTS 
+ADVANCED ANALYSIS OF DEADWOOD METAGENOMICS TEFS
+###### packages
+install.packages("vegan")
+install.packages("multcompView")
+install.packages("pheatmap")
+install.packages("CCA")
+# demo
+> library(xlsx) # read.xlsx()
+> library(dplyr) # %>% / filter() / select() / mutate()
+> library(reshape2) # decast()
+> library(tidyverse) # column_to_rownames()
+> library(ggraph) # create_layout()
+> library(ggnetwork) # ggnetwork()
+> library(GGally) # plot corr matrix
+> library(cowplot) # plot_grid() for auto labeling
+###### packages
+install.packages("xlsx")
+install.packages("dplyr")
+install.packages("reshape2")
+install.packages("tidyverse")
+install.packages("ggraph")
+install.packages("ggnetwork")
+install.packages("GGally")
+install.packages("cowplot")
+###### calculation of diversity and richness
+setwd("A:/ADVANCED ANALYSIS")
+ADVANCED.GENOMEs <- (read.csv ("A:/ADVANCED ANALYSIS/DEADWOOD.csv", header=T, sep=",",row.names= 1, check.names= F, comment.char=""))
+require (vegan)
+fix (ADVANCED.GENOMEs)
+estimateR (ADVANCED.GENOMEs)
+require (vegan)
+richness <- estimateR
+##### richness
+richness <- estimateR(ADVANCED.GENOMEs)
+write.csv(richness, file="RICHNESS.csv")
+##### shannon
+diversity(ADVANCED.GENOMEs, "shannon")
+ADVANCED_shannon<- diversity(ADVANCED.GENOMEs, "shannon")
+write.csv(ADVANCED_shannon, file="shannon.csv")
+##### simpson
+diversity(ADVANCED.GENOMEs, "simpson")
+ADVANCED_simpson<- diversity(ADVANCED.GENOMEs, "simpson")
+write.csv(ADVANCED_simpson, file="simpson.csv")
+########plot shannon
+##### shannon
+# loading the appropriate libraries
+install.packages("datasets")
+install.packages("ggplot2")
+install.packages("multcompView")
+install.packages("dplyr")
+shannon.richness <- read.csv("A:/ADVANCED ANALYSIS/shannon.csv")
+
+library(datasets)
+library(ggplot2)
+library(multcompView)
+library(dplyr)
+# loading and checking the data
+str(shannon.richness)
+# analysis of variance
+anova <- aov(shannon ~ site, data = shannon.richness)
+summary(anova)
+# Tukey's test
+tukey <- TukeyHSD(anova)
+print(tukey)
+# compact letter display
+cld <- multcompLetters4(anova, tukey)
+print(cld)
+# table with factors and 3rd quantile
+Tk <- group_by(shannon.richness, site) %>%
+  summarise(mean=mean(shannon), quant = quantile(shannon, probs = 0.75)) %>%
+  arrange(desc(mean))
+# extracting the compact letter display and adding to the Tk table
+cld <- as.data.frame.list(cld$site)
+Tk$cld <- cld$Letters
+print(Tk)
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot()
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="shannon (g)")
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="shannon (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="shannon (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld))
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="shannon (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot
+ggplot(shannon.richness, aes(site, shannon)) + 
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(x="Site Type", y="shannon (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot colorful
+ggplot(shannon.richness, aes(site, shannon)) +  
+  geom_boxplot(aes(fill = site)) +
+  labs(x="Site Type", y="shannon (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+dev.print(device=win.metafile,
+          file="shannon_DEADWOOD.emf")
+#######plot_simpson
+# loading the appropriate libraries
+install.packages("datasets")
+install.packages("ggplot2")
+install.packages("multcompView")
+install.packages("dplyr")
+simpson.richness <- read.csv("A:/ADVANCED ANALYSIS/simpson.csv")
+library(datasets)
+library(ggplot2)
+library(multcompView)
+library(dplyr)
+# loading and checking the data
+str(simpson.richness)
+# analysis of variance
+anova <- aov(simpson ~ site, data = simpson.richness)
+summary(anova)
+# Tukey's test
+tukey <- TukeyHSD(anova)
+print(tukey)
+# compact letter display
+cld <- multcompLetters4(anova, tukey)
+print(cld)
+# table with factors and 3rd quantile
+Tk <- group_by(simpson.richness, site) %>%
+  summarise(mean=mean(simpson), quant = quantile(simpson, probs = 0.75)) %>%
+  arrange(desc(mean))
+# extracting the compact letter display and adding to the Tk table
+cld <- as.data.frame.list(cld$site)
+Tk$cld <- cld$Letters
+print(Tk)
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot()
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="simpson (g)")
+
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="simpson (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="simpson (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld))
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="simpson (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot
+ggplot(simpson.richness, aes(site, simpson)) + 
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(x="Site Type", y="simpson (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot colorful
+ggplot(simpson.richness, aes(site, simpson)) +  
+  geom_boxplot(aes(fill = site)) +
+  labs(x="Site Type", y="simpson (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+dev.print(device=win.metafile,
+          file="simpson_DEADWOOD.emf")
+obs.richness <- read.csv("A:/ADVANCED ANALYSIS/obs.csv")
+library(datasets)
+library(ggplot2)
+library(multcompView)
+library(dplyr)
+# loading and checking the data
+str(obs.richness)
+# analysis of variance
+anova <- aov(obs ~ site, data = obs.richness)
+summary(anova)
+# Tukey's test
+tukey <- TukeyHSD(anova)
+print(tukey)
+# compact letter display
+cld <- multcompLetters4(anova, tukey)
+print(cld)
+# table with factors and 3rd quantile
+Tk <- group_by(obs.richness, site) %>%
+  summarise(mean=mean(obs), quant = quantile(obs, probs = 0.75)) %>%
+  arrange(desc(mean))
+# extracting the compact letter display and adding to the Tk table
+cld <- as.data.frame.list(cld$site)
+Tk$cld <- cld$Letters
+print(Tk)
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot()
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="obs (g)")
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="obs (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="obs (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld))
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="obs (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot
+ggplot(obs.richness, aes(site, obs)) + 
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(x="Site Type", y="obs (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot colorful
+ggplot(obs.richness, aes(site, obs)) +  
+  geom_boxplot(aes(fill = site)) +
+  labs(x="Site Type", y="obs (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+dev.print(device=win.metafile,
+          file="obs_DEADWOOD.emf")
+chao1.richness <- read.csv("A:/ADVANCED ANALYSIS/chao1.csv")
+library(datasets)
+library(ggplot2)
+library(multcompView)
+library(dplyr)
+# loading and checking the data
+str(chao1.richness)
+# analysis of variance
+anova <- aov(chao1 ~ site, data = chao1.richness)
+summary(anova)
+# Tukey's test
+tukey <- TukeyHSD(anova)
+print(tukey)
+# compact letter display
+cld <- multcompLetters4(anova, tukey)
+print(cld)
+# table with factors and 3rd quantile
+Tk <- group_by(chao1.richness, site) %>%
+  summarise(mean=mean(chao1), quant = quantile(chao1, probs = 0.75)) %>%
+  arrange(desc(mean))
+# extracting the compact letter display and adding to the Tk table
+cld <- as.data.frame.list(cld$site)
+Tk$cld <- cld$Letters
+print(Tk)
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot()
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="chao1 (g)")
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="chao1 (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="chao1 (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld))
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="chao1 (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot
+ggplot(chao1.richness, aes(site, chao1)) + 
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(x="Site Type", y="chao1 (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot colorful
+ggplot(chao1.richness, aes(site, chao1)) +  
+  geom_boxplot(aes(fill = site)) +
+  labs(x="Site Type", y="chao1 (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+dev.print(device=win.metafile,
+          file="chao1_DEADWOOD.emf")
+ACE.richness <- read.csv("A:/ADVANCED ANALYSIS/ACE.csv")
+library(datasets)
+library(ggplot2)
+library(multcompView)
+library(dplyr)
+# loading and checking the data
+str(ACE.richness)
+# analysis of variance
+anova <- aov(ACE ~ site, data = ACE.richness)
+summary(anova)
+# Tukey's test
+tukey <- TukeyHSD(anova)
+print(tukey)
+# compact letter display
+cld <- multcompLetters4(anova, tukey)
+print(cld)
+# table with factors and 3rd quantile
+Tk <- group_by(ACE.richness, site) %>%
+  summarise(mean=mean(ACE), quant = quantile(ACE, probs = 0.75)) %>%
+  arrange(desc(mean))
+# extracting the compact letter display and adding to the Tk table
+cld <- as.data.frame.list(cld$site)
+Tk$cld <- cld$Letters
+print(Tk)
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot()
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="ACE (g)")
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="ACE (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="ACE (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld))
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot() +
+  labs(x="Site Type", y="ACE (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot
+ggplot(ACE.richness, aes(site, ACE)) + 
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(x="Site Type", y="ACE (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+# boxplot colorful
+ggplot(ACE.richness, aes(site, ACE)) +  
+  geom_boxplot(aes(fill = site)) +
+  labs(x="Site Type", y="ACE (g)") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  geom_text(data = Tk, aes(x = site, y = quant, label = cld), size = 3, vjust=-1, hjust =-1)
+dev.print(device=win.metafile,
+          file="ACE_DEADWOOD.emf")
+###### obs
+obs.richness <- read.csv("A:/ADVANCED ANALYSIS/obs.csv")
+require (graphics)
+TukeyHSD(aov(obs~ factor(site), data=obs.richness))
+##### chao1_one
+chao1_one.richness <- read.csv("A:/ADVANCED ANALYSIS/chao1_one.csv")
+require (graphics)
+TukeyHSD(aov(chao1_one~ factor(site), data=chao1_one.richness))
+##### ACE
+ACE.richness <- read.csv("A:/ADVANCED ANALYSIS/ACE.csv")
+require (graphics)
+TukeyHSD(aov(ACE~ factor(site), data=ACE.richness))
+##### shannon
+shannon<- read.csv("A:/ADVANCED ANALYSIS/shannon.csv")
+require (graphics)
+TukeyHSD(aov(shannon~ factor(site), data=shannon))
+anovadata=read.csv (file.choose ())
+summary (anovadata)
+aov (site ~ shannon, data=anovadata)
+aovl <- aov(site ~ shannon, data=anovadata)
+summary(aov1)
+model.tables (aov1, "means")
+aov2 <- aov (after - sex + age + sex:age, data=anovadata)
+summary (aov2)
+model.tables (aov2, "means")
+TukeyHSD (aov2)
+##### simpson
+simpson<- read.csv("A:/ADVANCED ANALYSIS/simpson.csv")
+require (graphics)
+TukeyHSD(aov(simpson~ factor(site), data=simpson))
+####### NMDS
+library (vegan)
+ADVANCED.species.ra <- read.csv ("A:/ADVANCED ANALYSIS/DEADWOOD_NMDS.csv", header=T, sep=",",row.names=1 , check.names= F, comment.char="")
+ADVANCED.species.ra.nmds <- metaMDS(ADVANCED.species.ra)
+plot(ADVANCED.species.ra.nmds)
+plot(ADVANCED.species.ra.nmds, type="t", display="sites", cex= 0.7)
+text(ADVANCED.species.ra.nmds, display="site", cex=0.7, col="darkblue")
+text(ADVANCED.species.ra.nmds, display="species", cex=0.7, col="darkblue")
+dev.print(device=win.metafile, file="DEADWOOD_NMDS.emf")
+plot(ADVANCED.species.ra.nmds, type="t", display="species", cex= 1.0)
+dev.print(device=win.metafile, file="BAC_SPECIES_NMDS.emf")
+#####  Similarity test
+env <- read.csv("A:/ADVANCED ANALYSIS/DEADWOOD.csv", header=T , sep=",",row.names=1 , check.names= F, comment.char="")
+library(vegan)
+ADVANCED.species.ra.dist <- vegdist(ADVANCED.species.ra)
+attach(env)
+ADVANCED.species.ra.dist.ano <- anosim(ADVANCED.species.ra.dist, site)
+summary(ADVANCED.species.ra.dist.ano)
+plot(ADVANCED.species.ra.dist.ano)
+##### heatmap
+ADVANCED.species_top50 <- (read.csv("A:/ADVANCED ANALYSIS/DEADWOOD_HEATMAP.csv", header=T , sep=",",row.names=1 , check.names= F, comment.char=""))
+install.packages("pheatmap")
+library(pheatmap)
+library(vegan)
+fix(ADVANCED.species_top50)
+ADVANCED.species_top50_heatmap.hp <- as.matrix(ADVANCED.species_top50)
+ADVANCED.species_top50_heatmap.hp_hvl <- pheatmap(ADVANCED.species_top50_heatmap.hp, color=colorRampPalette(rev(c("red4","red3","red2","palegreen")))(100),
+                                               main="Bacterial Community Composition", trace="none", density.info="none", key=TRUE, keysize=1)
+dev.print(device=win.metafile, file="DEADWOOD_HEATMAP.emf")
+######NETWORK ANALYSIS
+install.packages("ggnetwork")
+install.packages("ggnetwork")
+install.packages("igraph")
+install.packages("dplyr")
+install.packages("reshape2")
+install.packages("tidyr")           
+install.packages("tidyverse")
+install.packages("ggraph")
+install.packages("ggnetwork")
+install.packages("GGally")
+install.packages("cowplot")
+install.packages("Hmisc")
+library("igraph")
+library("dplyr")
+library("reshape2")
+library("tidyr")           
+library("tidyverse")
+library("ggraph")
+library("ggnetwork")
+library("GGally")
+library("cowplot")
+library("corrplot")
+library("Hmisc")
+d1<-read.csv("A:/ADVANCED ANALYSIS/DEADWOOD.csv", header=T, sep=",", check.names= F, comment.char="")
+d2<-dcast(d1, SPECIES~PLOT, value.var="ABUNDANCE")
+head(d2)
+d2[is.na(d2)]<-0
+d2$Avg<-apply(X=d2[,2:3], MARGIN=1, FUN = mean)
+head(d2$Avg)
+d3<-d2 %>% filter(Avg>=1)
+d4<-d3 %>% select(-Avg) %>% column_to_rownames("SPECIES")
+head(d4)
+t(d4)
+d5<-cor(t(d4), method="pearson")
+d5[!upper.tri(d5)]<-NA
+head(d5)
+links<-d5 %>% melt(varnames=c("from", "to"), value.name="r") %>%
+  filter(!is.na(r) & abs(r) > 0.5) %>%
+  mutate(from=as.character(from)) %>%
+  mutate(to=as.character(to)) %>%
+  mutate(PosNeg=ifelse(r<0, "Neg", "Pos")) %>%
+  arrange(desc(abs(r)))
+nodes<-data.frame(SPECIES=unique(unlist(links[,c("from","to")])), stringsAsFactors=F) %>%
+  merge(x=., y=data.frame(ABUNDANCE=colMeans(t(d4)), stringsAsFactors=F), by.x="SPECIES", by.y=0) %>% arrange(desc(ABUNDANCE))
+net<-graph_from_data_frame(d=links, vertices=nodes, directed=F)
+colrs <- c("blue","blue","blue","blue","blue","blue","blue","blue","blue","blue")
+V(net)$color <- colrs[V(net)]
+V(net)$size <- V(net)$ABUNDANCE*3
+######
+plot(net)
+dev.print(device=win.metafile,
+          file="DEADWOOD.emf")
+######
+library("ggplot2")
+set.seed(1678)
+n1<-create_layout(net, layout='star')
+n2<-ggnetwork(net)
+n3<-merge(x=links, y=n1[,1:4], by.x='from', by.y='name') %>%
+  merge(x=., y= n1[,1:3] %>% rename(xend=x, yend=y), by.x='to', by.y='name') %>%
+  select(-to) %>% arrange(from) %>% rename(name=from) %>%
+  select(x, y, name, ABUNDANCE, xend, yend, r, PosNeg)
+n4<-n1 %>% select(x, y, name) %>% add_column(xend=.$x, yend=.$y) %>%
+  merge(x=., y=n2 %>% select(name, ABUNDANCE) %>% unique, by.x='name', by.y='name') %>%
+  select(x, y, name, ABUNDANCE, xend, yend) %>% add_column(r=NA, PosNeg="<NA>")
+n5<-rbind(n3, n4)
+p0<-n5 %>%
+  ggplot(aes(x=x, y=y, xend=xend, yend=yend)) + geom_edges(aes(color=PosNeg, linewidth=abs(r)), alpha=0.8, show.legend=T, curvature=-0.05)+
+  geom_nodes(aes(size=ABUNDANCE*1600), colour="black", alpha=0.9, show.legend=F)+ geom_nodes(aes(size=ABUNDANCE*400), colour="green", show.legend=F)+
+  geom_nodelabel_repel(aes(label=name), fontface="bold", box.padding=unit(1, "lines"))+
+  scale_size_continuous("Absolute(r)", breaks=c(0.6,0.8,1), labels=c(0.6,0.8,1))+ scale_color_manual("Correlation", labels=c("Negative","Positive"), values=c("#e41a1c","#377eb8"))+
+  theme_blank()
+######
+p0
+dev.print(device=win.metafile,
+         file="DEADWOOD.Jpeg")
+######
+plot(n3)
+######
+t(d4)
+library(GGally)
+ggcorr(t(d4))
+ggcorr(t(d4), nbreaks=5)
+p1<-ggcorr(t(d4), label=TRUE, label_round=1, label_size=3, label_color="gray10", layout.exp=2, hjust=0.9, size=4, color="black", low="#e41a1c", high="#377eb8")
+######
+p1
+library(cowplot)
+pdf(file="figure.pdf",width=12,height=6)
+plot_grid(p0, p1, labels="AUTO", ncol=2, rel_widths=c(3,2))
+dev.off()
+dev.print(device=win.metafile,
+          file="DEADWOOD.emf")
+######ROSE PLOT
+install.packages("RColorBrewer ")
+install.packages("ggplot2")
+install.packages("reshape2")
+# Install and load required packages
+install.packages("RColorBrewer")
+install.packages("ggplot2")
+install.packages("reshape2")
+library(RColorBrewer)
+library(ggplot2)
+library(reshape2)
+###
+set.seed(123)
+data1 <- data.frame(chr = rep(1:5, each = 20),
+                    start = sample(1:100, 100, replace = TRUE),
+                    end = sample(101:200, 100, replace = TRUE))
+data2 <- data.frame(chr = rep(1:5, each = 20),
+                    start = sample(50:150, 100, replace = TRUE),
+                    end = sample(151:250, 100, replace = TRUE))
+# Function to calculate overlap ratio
+calculate_overlap_ratio <- function(x, y) {
+  overlap <- pmin(x$end, y$end) - pmax(x$start, y$start)
+  overlap[overlap < 0] <- 0
+  ratio <- overlap / (x$end - x$start)
+  return(mean(ratio, na.rm = TRUE))
+}
+# Calculate overlap ratio 
+overlap_ratios <- sapply(1:5, function(i) calculate_overlap_ratio(data1[data1$chr == i, ], data2[data2$chr == i, ]))
+# Create a data frame for plotting
+plot_data <- data.frame(chr = 1:5, overlap_ratio = overlap_ratios)
+# ROSE plot using ggplot2
+ggplot(plot_data, aes(x = factor(chr), y = overlap_ratio, fill = factor(chr))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(title = "ROSE Plot", x = "Chromosome", y = "Overlap Ratio") +
+  theme_minimal()
+######
+set.seed(123)
+data <- data.frame(
+  Category = c("A", "B", "C", "D"),
+  Value1 = sample(1:50, 4),
+  Value2 = sample(1:50, 4))
+melted_data <- melt(data, id.vars = "Category", variable.name = "Variable", value.name = "Value")
+# Bar chart using ggplot2
+ggplot(melted_data, aes(x = Category, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Bar Chart", x = "Categories", y = "Values") +
+  theme_minimal()
+###Pie correlation plot
+#' Pie Correlation Plot for CAZyme Families using Pearson Chi-squared test
+#' @param data The dataset containing CAZyme family abundance and correlation values.
+#' @param year The decomposition year (e.g., 2017, 2018, 2019).
+#' @param species The tree species (e.g., "Ma" for Machilus thunbergii, "Qu" for Quercus pachyloma).
+#' @return A Pie Correlation plot.
+#' @export
+pie_correlation <- function(data, year, species) {
+  library(ggplot2)
+  library(stats)
+
+  # Subset data based on year and species
+  subset_data <- data[data$Year == year & data$Species == species, ]
+  # Create a contingency table for Chi-squared test
+  contingency_table <- table(subset_data$CAZyme_Abundance, subset_data$Correlation)
+  # Perform Pearson Chi-squared test
+  chi_squared_result <- chisq.test(contingency_table)
+  # Your plotting code for Pie Correlation plot
+  ggplot(subset_data, aes(x = "", y = CAZyme_Abundance, fill = Correlation)) +
+    geom_bar(stat = "identity", width = 1, color = "white") +
+    coord_polar("y") +
+    scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+    labs(title = paste("Pie Correlation Plot for", species, "in", year),
+         subtitle = paste("Pearson Chi-squared p-value:", format.pval(chi_squared_result$p.value)),
+         fill = "Correlation") +
+    theme_void()
+}
+
+
